@@ -1,0 +1,15 @@
+{
+	"template_name":"deliver_notification",
+	"broadcast_name":"delivery_notificationBD",
+	"parameters":[
+		{
+			
+		"name":"order_tracking_num",
+		"value":"OD202503201250186628B"
+		},
+		{
+			"name":null,
+			"value":null
+		}
+	]
+}

@@ -1,0 +1,18 @@
+package hcl.tech.entity;
+
+@Entity
+public class StockEntry {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String symbol;
+    private int quantity;
+    private double purchasePrice;
+
+    private String userEmail; // From JWT
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime addedAt = LocalDateTime.now();
+
+}

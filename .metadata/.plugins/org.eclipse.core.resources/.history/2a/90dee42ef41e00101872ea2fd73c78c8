@@ -1,0 +1,2 @@
+spring.application.name=ReportService-Hcl
+server.port=8084

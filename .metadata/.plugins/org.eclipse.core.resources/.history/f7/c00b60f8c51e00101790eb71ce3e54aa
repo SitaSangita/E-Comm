@@ -1,0 +1,27 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:portfolio
+    driverClassName: org.h2.Driver
+    username: HLC
+    password: hcl@123
+  h2:
+    console:
+      enabled: true
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+  mail:
+    host: smtp.example.com
+    port: 587
+    username: your_email@example.com
+    password: your_password
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+server:
+  port: 9595

@@ -1,0 +1,5 @@
+package hlc.tech.UserPortFolio.entity;
+
+public class User {
+
+}

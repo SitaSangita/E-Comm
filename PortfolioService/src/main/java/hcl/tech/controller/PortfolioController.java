@@ -1,0 +1,59 @@
+package hcl.tech.controller;
+
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import hcl.tech.entity.StockEntry;
+import hcl.tech.repo.StockEntryRepository;
+import hcl.tech.util.JwtUtil;
+import jakarta.servlet.http.HttpServletRequest;
+
+@RestController
+@RequestMapping("/portfolio")
+public class PortfolioController {
+
+    @Autowired private StockEntryRepository repo;
+    @Autowired private JwtUtil jwtUtil;
+
+    private String getUserEmail(HttpServletRequest request) {
+        String auth = request.getHeader("Authorization");
+        if (auth == null || !auth.startsWith("Bearer ")) return null;
+        return jwtUtil.extractEmail(auth.substring(7));
+    }
+    @GetMapping("/welcome")
+   	public String getWelcome() {
+   		String msg="Welcome to UserAPI......";
+   		return msg;
+   	}
+    @PostMapping("/add")
+    public ResponseEntity<?> addStock(@RequestBody StockEntry stock, HttpServletRequest req) {
+        stock.setUserEmail(getUserEmail(req));
+        return ResponseEntity.ok(repo.save(stock));
+    }
+
+    @GetMapping("/hcl")
+    public ResponseEntity<?> getPortfolio(HttpServletRequest req) {
+    	System.out.println("Welcome to Portfolio service");
+        return ResponseEntity.ok(repo.findByUserEmail(getUserEmail(req)));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteStock(@PathVariable Long id, HttpServletRequest req) {
+        Optional<StockEntry> stock = repo.findById(id);
+        if (stock.isPresent() && stock.get().getUserEmail().equals(getUserEmail(req))) {
+            repo.deleteById(id);
+            return ResponseEntity.ok("Deleted");
+        }
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Unauthorized");
+    }
+}

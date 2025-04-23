@@ -1,0 +1,83 @@
+package hcl.tech.controller;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import hcl.tech.dto.DailyReport;
+import hcl.tech.dto.WeeklyReport;
+import hcl.tech.entity.StockEntry;
+import hcl.tech.repo.StockEntryRepository;
+import jakarta.servlet.http.HttpServletRequest;
+
+@RestController
+@RequestMapping("/portfolio/report")
+public class ReportController {
+
+    @Autowired private StockEntryRepository repo;
+    @Autowired 
+    private JwtUtil jwtUtil;
+
+    private String getUserEmail(HttpServletRequest req) {
+        String token = req.getHeader("Authorization").substring(7);
+        return jwtUtil.extractEmail(token);
+    }
+
+    @GetMapping("/daily")
+    public DailyReport getTodayReport(HttpServletRequest req) {
+        String email = getUserEmail(req);
+        LocalDate today = LocalDate.now();
+        LocalDateTime start = today.atStartOfDay();
+        LocalDateTime end = today.plusDays(1).atStartOfDay();
+
+        List<StockEntry> stocks = repo.findByUserEmailAndAddedAtBetween(email, start, end);
+
+        double total = 0;
+        for (StockEntry s : stocks) total += s.getPurchasePrice() * s.getQuantity();
+
+        DailyReport report = new DailyReport();
+        report.setDate(today);
+        report.setTotalInvestment(total);
+        report.setTotalStocks(stocks.size());
+
+        return report;
+    }
+
+    @GetMapping("/weekly")
+    public WeeklyReport getWeeklyReport(HttpServletRequest req) {
+        String email = getUserEmail(req);
+        LocalDate endDate = LocalDate.now();
+        LocalDate startDate = endDate.minusDays(6);
+        List<DailyReport> list = new ArrayList<>();
+
+        for (int i = 0; i <= 6; i++) {
+            LocalDate date = startDate.plusDays(i);
+            LocalDateTime start = date.atStartOfDay();
+            LocalDateTime end = date.plusDays(1).atStartOfDay();
+            List<StockEntry> stocks = repo.findByUserEmailAndAddedAtBetween(email, start, end);
+
+            double total = 0;
+            for (StockEntry s : stocks) total += s.getPurchasePrice() * s.getQuantity();
+
+            DailyReport r = new DailyReport();
+            r.setDate(date);
+            r.setTotalStocks(stocks.size());
+            r.setTotalInvestment(total);
+
+            list.add(r);
+        }
+
+        WeeklyReport report = new WeeklyReport();
+        report.setDailyReports(list);
+        report.setStartDate(startDate);
+        report.setEndDate(endDate);
+
+        return report;
+    }
+}

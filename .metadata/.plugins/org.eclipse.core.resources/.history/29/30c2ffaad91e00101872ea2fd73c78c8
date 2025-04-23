@@ -1,0 +1,5 @@
+package hcl.tech.service;
+
+public class JwtService {
+
+}

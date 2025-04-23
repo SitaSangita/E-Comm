@@ -1,0 +1,21 @@
+package hcl.tech.util;
+
+import org.springframework.stereotype.Component;
+
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
+
+@Component
+public class JwtUtil {
+
+    private final String SECRET = "your-256-bit-secret";
+
+    public String extractEmail(String token) {
+        return Jwts.parser()
+            .verifyWith(Keys.hmacShaKeyFor(SECRET.getBytes()))
+            .build()
+            .parseSignedClaims(token)
+            .getPayload()
+            .getSubject();
+    }
+}

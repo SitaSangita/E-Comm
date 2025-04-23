@@ -1,0 +1,10 @@
+package hcl.tech.dto;
+
+import java.time.LocalDate;
+
+public class DailyReport {
+    private double totalInvestment;
+    private int totalStocks;
+    private LocalDate date;
+    // Getters and setters
+}
